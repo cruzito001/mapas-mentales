@@ -226,6 +226,38 @@ const MindMapEditor = () => {
 
   // Load saved data on mount
   useEffect(() => {
+    // Check if we need to load a specific map from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const mapId = urlParams.get('mapId');
+    
+    if (mapId) {
+      // Load specific map from saved maps
+      try {
+        const savedMaps = localStorage.getItem('savedMindMaps');
+        if (savedMaps) {
+          const maps = JSON.parse(savedMaps);
+          const targetMap = maps.find(map => map.id === mapId);
+          
+          if (targetMap && targetMap.data) {
+            const { nodes: savedNodes, connections: savedConnections, zoom: savedZoom, pan: savedPan } = targetMap.data;
+            if (savedNodes && savedNodes.length > 0) {
+              setNodes(savedNodes);
+              setConnections(savedConnections || []);
+              setZoom(savedZoom || 1);
+              setPan(savedPan || { x: 0, y: 0 });
+              
+              // Save as current map for auto-save
+              localStorage.setItem('currentMindMap', JSON.stringify(targetMap.data));
+              return;
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error loading specific mind map:', error);
+      }
+    }
+    
+    // Fallback to current mind map if no specific map requested or found
     const savedData = localStorage.getItem('currentMindMap');
     if (savedData) {
       try {
@@ -422,7 +454,7 @@ const MindMapEditor = () => {
 
 
   const handleZoom = useCallback((delta, centerX, centerY) => {
-    const newZoom = Math.max(0.1, Math.min(3, zoom + delta));
+    const newZoom = Math.max(0.1, Math.min(1, zoom + delta)); // Límite máximo de 100% (1)
     
     // Zoom towards the center point
     const zoomFactor = newZoom / zoom;
@@ -511,13 +543,10 @@ const MindMapEditor = () => {
   }, []);
 
   const handleWheel = useCallback((event) => {
+    // Deshabilitar zoom con trackpad/scroll - solo prevenir el comportamiento por defecto
     event.preventDefault();
-    const delta = event.deltaY > 0 ? -0.1 : 0.1;
-    const rect = canvasRef.current.getBoundingClientRect();
-    const centerX = event.clientX - rect.left;
-    const centerY = event.clientY - rect.top;
-    handleZoom(delta, centerX, centerY);
-  }, [handleZoom]);
+    // No hacer zoom con trackpad/scroll
+  }, []);
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -550,6 +579,33 @@ const MindMapEditor = () => {
     };
   }, [dragState, resizeState, selectedNode, zoom, pan, handleResizeMove, handleResizeEnd]);
 
+  // Export PDF function
+  const exportPDF = async () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    try {
+      const html2canvas = (await import('html2canvas')).default;
+      const jsPDF = (await import('jspdf')).default;
+      
+      const canvasElement = await html2canvas(canvas, {
+        backgroundColor: isDarkMode ? '#1a1a1a' : '#ffffff',
+        scale: 2
+      });
+      
+      const imgData = canvasElement.toDataURL('image/png');
+      const pdf = new jsPDF('l', 'mm', 'a4');
+      const imgWidth = 297;
+      const imgHeight = (canvasElement.height * imgWidth) / canvasElement.width;
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      pdf.save('mapa-mental.pdf');
+    } catch (error) {
+      console.error('Error al exportar PDF:', error);
+      alert('Error al exportar el PDF');
+    }
+  };
+
   return (
     <div className={styles.editorContainer}>
       <EditorToolbar 
@@ -570,6 +626,10 @@ const MindMapEditor = () => {
         onClearAll={clearAll}
         canUndo={history.past.length > 0}
         canRedo={history.future.length > 0}
+        onExportPDF={exportPDF}
+        nodes={nodes}
+        connections={connections}
+        pan={pan}
       />
       <div 
         ref={canvasRef}

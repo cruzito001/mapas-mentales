@@ -3,60 +3,16 @@ import Layout from '../layouts/Layout.astro';
 import MindMapCard from '../components/MindMapCard.jsx';
 import BottomNavigation from '../components/BottomNavigation.jsx';
 import ThemeWrapper from '../components/ThemeWrapper.jsx';
-
-// Datos de ejemplo para los mapas mentales
-const sampleMindMaps = [
-	{
-		id: 1,
-		title: 'Estrategias de Marketing Digital',
-		description: 'Mapa mental completo sobre las principales estrategias de marketing en el entorno digital.',
-		category: 'empresarial',
-		lastModified: new Date('2024-01-15'),
-		nodeCount: 24,
-		thumbnail: 'https://trae-api-us.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20digital%20marketing%20strategy%20mind%20map%20with%20colorful%20nodes%20and%20connections%2C%20clean%20design&image_size=landscape_4_3'
-	},
-	{
-		id: 2,
-		title: 'Revolución Francesa',
-		description: 'Análisis histórico de las causas, desarrollo y consecuencias de la Revolución Francesa.',
-		category: 'academico',
-		lastModified: new Date('2024-01-12'),
-		nodeCount: 18,
-		thumbnail: 'https://trae-api-us.mchost.guru/api/ide/v1/text_to_image?prompt=french%20revolution%20historical%20mind%20map%20with%20timeline%20and%20key%20events%2C%20educational%20style&image_size=landscape_4_3'
-	},
-	{
-		id: 3,
-		title: 'Objetivos Personales 2024',
-		description: 'Planificación personal de metas y objetivos para el año 2024.',
-		category: 'personal',
-		lastModified: new Date('2024-01-10'),
-		nodeCount: 12
-	}
-];
+import MyMapsSection from '../components/MyMapsSection.jsx';
 ---
 
 <Layout title="Mapas Mentales - Herramienta Educativa">
 	<ThemeWrapper client:load>
 		<main class="main-container">
-		<div class="content-wrapper">
-			<div class="cards-section">
-				<div class="cards-grid">
-					{sampleMindMaps.map((mindMap) => (
-						<MindMapCard
-							client:load
-							title={mindMap.title}
-							description={mindMap.description}
-							category={mindMap.category}
-							lastModified={mindMap.lastModified}
-							nodeCount={mindMap.nodeCount}
-							thumbnail={mindMap.thumbnail}
-							onClick={() => console.log(`Abrir mapa: ${mindMap.title}`)}
-						/>
-					))}
-				</div>
+			<div class="content-wrapper">
+				<MyMapsSection client:load />
 			</div>
-		</div>
-		
+			
 			<BottomNavigation client:load />
 		</main>
 	</ThemeWrapper>

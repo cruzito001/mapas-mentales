@@ -3,14 +3,14 @@ import { useThemeSafe } from '../hooks/useThemeSafe';
 import ThemeToggle from './ThemeToggle';
 import styles from './EditorToolbar.module.css';
 
-const EditorToolbar = ({ 
-  tool, 
-  onToolChange, 
-  zoom, 
-  onZoom, 
-  onResetView, 
-  selectedNode, 
-  onNodeUpdate, 
+const EditorToolbar = ({
+  tool,
+  onToolChange,
+  zoom,
+  onZoom,
+  onResetView,
+  selectedNode,
+  onNodeUpdate,
   onNodeDelete,
   connectionStyles,
   onConnectionStylesChange,
@@ -20,7 +20,11 @@ const EditorToolbar = ({
   onRedo,
   onClearAll,
   canUndo,
-  canRedo
+  canRedo,
+  onExportPDF,
+  nodes,
+  connections,
+  pan
 }) => {
   const { isDarkMode } = useThemeSafe();
   const [showColorPicker, setShowColorPicker] = useState(false);
@@ -113,14 +117,58 @@ const EditorToolbar = ({
   };
 
   const [isExporting, setIsExporting] = useState(false);
+  const [showSaveMenu, setShowSaveMenu] = useState(false);
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [mapName, setMapName] = useState('');
 
   const handleExportPDF = async () => {
     setIsExporting(true);
     try {
-      await onExportPDF();
+      if (onExportPDF) {
+        await onExportPDF();
+      } else {
+        alert('Funcionalidad de exportar PDF no disponible');
+      }
     } finally {
       setIsExporting(false);
     }
+    setShowSaveMenu(false);
+  };
+
+  const handleSaveProgress = () => {
+    setShowSaveDialog(true);
+    setShowSaveMenu(false);
+  };
+
+  const confirmSaveProgress = () => {
+    if (mapName.trim()) {
+      const mapData = {
+        id: Date.now().toString(),
+        name: mapName.trim(),
+        data: {
+          nodes: nodes || [],
+          connections: connections || [],
+          zoom: zoom || 1,
+          pan: pan || { x: 0, y: 0 }
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      
+      // Guardar en localStorage
+      const savedMaps = JSON.parse(localStorage.getItem('mindMaps') || '[]');
+      savedMaps.push(mapData);
+      localStorage.setItem('mindMaps', JSON.stringify(savedMaps));
+      
+      setShowSaveDialog(false);
+      setMapName('');
+      alert('Mapa guardado exitosamente');
+    }
+  };
+
+  const cancelSaveProgress = () => {
+    setShowSaveDialog(false);
+    setMapName('');
   };
 
   const handleClearAllWithConfirm = () => {
@@ -329,21 +377,83 @@ const EditorToolbar = ({
           </button>
         </div>
 
-        <button 
-          className={styles.exportButton}
-          onClick={handleExportPDF}
-          disabled={isExporting}
-          title="Exportar mapa mental como PDF"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="7,10 12,15 17,10"></polyline>
-            <line x1="12" y1="15" x2="12" y2="3"></line>
-          </svg>
-          <span className="export-button-text">
-            {isExporting ? 'Exportando...' : 'Exportar PDF'}
-          </span>
-        </button>
+        <div className={styles.saveContainer}>
+          <button 
+            className={styles.saveButton}
+            onClick={() => setShowSaveMenu(!showSaveMenu)}
+            title="Opciones de guardado"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+              <polyline points="17,21 17,13 7,13 7,21"></polyline>
+              <polyline points="7,3 7,8 15,8"></polyline>
+            </svg>
+            <span>Guardar</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className={styles.dropdownIcon}>
+              <polyline points="6,9 12,15 18,9"></polyline>
+            </svg>
+          </button>
+          
+          {showSaveMenu && (
+            <div className={styles.saveMenu}>
+              <button 
+                className={styles.saveMenuItem}
+                onClick={handleExportPDF}
+                disabled={isExporting}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7,10 12,15 17,10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span>{isExporting ? 'Exportando...' : 'Exportar PDF'}</span>
+              </button>
+              <button 
+                className={styles.saveMenuItem}
+                onClick={handleSaveProgress}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                  <polyline points="17,21 17,13 7,13 7,21"></polyline>
+                  <polyline points="7,3 7,8 15,8"></polyline>
+                </svg>
+                <span>Guardar Progreso</span>
+              </button>
+            </div>
+          )}
+        </div>
+        
+        {showSaveDialog && (
+          <div className={styles.saveDialog}>
+            <div className={styles.saveDialogContent}>
+              <h3>Guardar Progreso</h3>
+              <p>Ingresa un nombre para tu mapa mental:</p>
+              <input 
+                type="text"
+                value={mapName}
+                onChange={(e) => setMapName(e.target.value)}
+                placeholder="Nombre del mapa mental"
+                className={styles.saveInput}
+                autoFocus
+              />
+              <div className={styles.saveDialogActions}>
+                <button 
+                  className={styles.cancelButton}
+                  onClick={cancelSaveProgress}
+                >
+                  Cancelar
+                </button>
+                <button 
+                  className={styles.confirmButton}
+                  onClick={confirmSaveProgress}
+                  disabled={!mapName.trim()}
+                >
+                  Guardar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         <ThemeToggle />
       </div>
     </div>
