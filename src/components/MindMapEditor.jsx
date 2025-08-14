@@ -109,8 +109,96 @@ const MindMapEditor = () => {
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [tool, setTool] = useState('select'); // select, node, connection
   
+  // History system for undo/redo
+  const [history, setHistory] = useState({
+    past: [],
+    present: { nodes: [], connections: [] },
+    future: []
+  });
+  const [isUndoRedoAction, setIsUndoRedoAction] = useState(false);
+  
   const canvasRef = useRef(null);
   const editorRef = useRef(null);
+
+  // Save current state to history
+  const saveToHistory = useCallback(() => {
+    if (isUndoRedoAction) {
+      setIsUndoRedoAction(false);
+      return;
+    }
+    
+    setHistory(prev => ({
+      past: [...prev.past, prev.present].slice(-20), // Keep last 20 states
+      present: { nodes: [...nodes], connections: [...connections] },
+      future: [] // Clear future when new action is performed
+    }));
+  }, [nodes, connections, isUndoRedoAction]);
+
+  // Undo function
+  const undo = useCallback(() => {
+    if (history.past.length === 0) return;
+    
+    setIsUndoRedoAction(true);
+    const previous = history.past[history.past.length - 1];
+    const newPast = history.past.slice(0, -1);
+    
+    setHistory({
+      past: newPast,
+      present: previous,
+      future: [history.present, ...history.future]
+    });
+    
+    setNodes(previous.nodes);
+    setConnections(previous.connections);
+    setSelectedNode(null);
+    setSelectedConnection(null);
+  }, [history]);
+
+  // Redo function
+  const redo = useCallback(() => {
+    if (history.future.length === 0) return;
+    
+    setIsUndoRedoAction(true);
+    const next = history.future[0];
+    const newFuture = history.future.slice(1);
+    
+    setHistory({
+      past: [...history.past, history.present],
+      present: next,
+      future: newFuture
+    });
+    
+    setNodes(next.nodes);
+    setConnections(next.connections);
+    setSelectedNode(null);
+    setSelectedConnection(null);
+  }, [history]);
+
+  // Clear all function
+  const clearAll = useCallback(() => {
+    const rootNode = {
+      id: 'root',
+      x: 400,
+      y: 300,
+      width: 200,
+      height: 60,
+      text: 'Idea Principal',
+      color: '#00A651',
+      textColor: '#FFFFFF',
+      fontSize: 16,
+      isRoot: true
+    };
+    
+    setNodes([rootNode]);
+    setConnections([]);
+    setSelectedNode(null);
+    setSelectedConnection(null);
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+    
+    // Save to history
+    setTimeout(() => saveToHistory(), 0);
+  }, [saveToHistory]);
 
   // Auto-save functionality
   useEffect(() => {
@@ -127,6 +215,14 @@ const MindMapEditor = () => {
 
     return () => clearTimeout(saveTimer);
   }, [nodes, connections, zoom, pan]);
+
+  // Save to history when nodes or connections change
+  useEffect(() => {
+    if (nodes.length > 0) {
+      const timer = setTimeout(() => saveToHistory(), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [nodes, connections, saveToHistory]);
 
   // Load saved data on mount
   useEffect(() => {
@@ -469,10 +565,15 @@ const MindMapEditor = () => {
         onConnectionStylesChange={setConnectionStyles}
         selectedConnection={selectedConnection}
         onConnectionDelete={deleteConnection}
+        onUndo={undo}
+        onRedo={redo}
+        onClearAll={clearAll}
+        canUndo={history.past.length > 0}
+        canRedo={history.future.length > 0}
       />
       <div 
         ref={canvasRef}
-        className={`${styles.canvas} ${styles[tool + 'Tool']} ${dragState.isDragging ? styles.dragging : ''}`}
+        className={`${styles.canvas} mind-map-canvas ${styles[tool + 'Tool']} ${dragState.isDragging ? styles.dragging : ''}`}
         onMouseDown={handleCanvasMouseDown}
         onMouseMove={handleCanvasMouseMove}
         onMouseUp={handleCanvasMouseUp}

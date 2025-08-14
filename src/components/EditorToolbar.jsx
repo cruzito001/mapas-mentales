@@ -11,7 +11,16 @@ const EditorToolbar = ({
   onResetView, 
   selectedNode, 
   onNodeUpdate, 
-  onNodeDelete 
+  onNodeDelete,
+  connectionStyles,
+  onConnectionStylesChange,
+  selectedConnection,
+  onConnectionDelete,
+  onUndo,
+  onRedo,
+  onClearAll,
+  canUndo,
+  canRedo
 }) => {
   const { isDarkMode } = useThemeSafe();
   const [showColorPicker, setShowColorPicker] = useState(false);
@@ -103,6 +112,23 @@ const EditorToolbar = ({
     window.location.href = '/';
   };
 
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExportPDF = async () => {
+    setIsExporting(true);
+    try {
+      await onExportPDF();
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleClearAllWithConfirm = () => {
+    if (window.confirm('¿Estás seguro de que quieres borrar todo el mapa mental? Esta acción no se puede deshacer.')) {
+      onClearAll();
+    }
+  };
+
   return (
     <div className={styles.toolbar}>
       {/* Left section - Navigation */}
@@ -192,12 +218,13 @@ const EditorToolbar = ({
                   title="Cambiar color"
                 >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <circle cx="13.5" cy="6.5" r=".5"></circle>
-                    <circle cx="17.5" cy="10.5" r=".5"></circle>
-                    <circle cx="8.5" cy="7.5" r=".5"></circle>
-                    <circle cx="6.5" cy="12.5" r=".5"></circle>
-                    <path d="m12 2 3.3 6 5.4.7-3.9 3.8.9 5.3L12 15.4l-4.8 2.4.9-5.3L4.2 8.7l5.4-.7L12 2z" fill="currentColor" opacity="0.3"></path>
-                    <path d="M2 21c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2c1.3 0 1.9.5 2.5 1"></path>
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#FFD700" stroke="none"></path>
+                    <circle cx="6" cy="6" r="2" fill="#FF6B6B"></circle>
+                    <circle cx="18" cy="6" r="2" fill="#4ECDC4"></circle>
+                    <circle cx="6" cy="18" r="2" fill="#45B7D1"></circle>
+                    <circle cx="18" cy="18" r="2" fill="#96CEB4"></circle>
+                    <circle cx="12" cy="12" r="2" fill="#FFEAA7"></circle>
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="none" stroke="currentColor" strokeWidth="1.5"></path>
                   </svg>
                 </button>
                 
@@ -262,8 +289,61 @@ const EditorToolbar = ({
         )}
       </div>
 
-      {/* Right section - Theme toggle */}
+      {/* Right section - Export and Theme toggle */}
       <div className={styles.toolbarSection}>
+        {/* History Controls */}
+        <div className={styles.toolGroup}>
+          <button 
+            className={`${styles.toolButton} ${!canUndo ? styles.disabled : ''}`}
+            onClick={onUndo}
+            disabled={!canUndo}
+            title="Deshacer"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M3 7v6h6"></path>
+              <path d="m21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path>
+            </svg>
+          </button>
+          <button 
+            className={`${styles.toolButton} ${!canRedo ? styles.disabled : ''}`}
+            onClick={onRedo}
+            disabled={!canRedo}
+            title="Rehacer"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 7v6h-6"></path>
+              <path d="m3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"></path>
+            </svg>
+          </button>
+          <button 
+            className={styles.toolButton}
+            onClick={handleClearAllWithConfirm}
+            title="Borrar todo"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polyline points="3,6 5,6 21,6"></polyline>
+              <path d="m19,6v14a2,2 0 0,1-2,2H7a2,2 0 0,1-2-2V6m3,0V4a2,2 0 0,1,2-2h4a2,2 0 0,1,2,2v2"></path>
+              <line x1="10" y1="11" x2="10" y2="17"></line>
+              <line x1="14" y1="11" x2="14" y2="17"></line>
+            </svg>
+          </button>
+        </div>
+
+        <button 
+          className={styles.exportButton}
+          onClick={handleExportPDF}
+          disabled={isExporting}
+          title="Exportar mapa mental como PDF"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7,10 12,15 17,10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span className="export-button-text">
+            {isExporting ? 'Exportando...' : 'Exportar PDF'}
+          </span>
+        </button>
         <ThemeToggle />
       </div>
     </div>
