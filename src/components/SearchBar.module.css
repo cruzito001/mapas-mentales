@@ -1,0 +1,124 @@
+.searchContainer {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.searchForm {
+  width: 100%;
+}
+
+.searchInputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 166, 81, 0.2);
+  border-radius: 12px;
+  padding: 12px 16px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 166, 81, 0.1);
+}
+
+.searchInputWrapper:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 12px rgba(0, 166, 81, 0.2);
+  transform: translateY(-1px);
+}
+
+.searchIcon {
+  width: 20px;
+  height: 20px;
+  color: var(--color-text-secondary);
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.searchInput {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 16px;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-text);
+  font-weight: 400;
+}
+
+.searchInput::placeholder {
+  color: var(--color-text-secondary);
+  font-weight: 400;
+}
+
+.clearButton {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 166, 81, 0.1);
+  border: none;
+  border-radius: 50%;
+  color: var(--color-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+
+.clearButton:hover {
+  background: rgba(0, 166, 81, 0.2);
+  transform: scale(1.1);
+}
+
+.clearButton svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .searchContainer {
+    padding: 0 12px;
+  }
+  
+  .searchInputWrapper {
+    padding: 10px 14px;
+    border-radius: 10px;
+  }
+  
+  .searchInput {
+    font-size: 16px; /* Evita zoom en iOS */
+  }
+}
+
+@media (max-width: 480px) {
+  .searchInputWrapper {
+    padding: 8px 12px;
+  }
+  
+  .searchIcon {
+    width: 18px;
+    height: 18px;
+    margin-right: 10px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .searchInputWrapper {
+    background: rgba(28, 28, 30, 0.9);
+    border-color: rgba(0, 166, 81, 0.3);
+  }
+  
+  .searchInput {
+    color: #f2f2f7;
+  }
+  
+  .searchInput::placeholder {
+    color: #8e8e93;
+  }
+}

@@ -1,11 +1,145 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
+import MindMapCard from '../components/MindMapCard.jsx';
+import BottomNavigation from '../components/BottomNavigation.jsx';
+import ThemeWrapper from '../components/ThemeWrapper.jsx';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+// Datos de ejemplo para los mapas mentales
+const sampleMindMaps = [
+	{
+		id: 1,
+		title: 'Estrategias de Marketing Digital',
+		description: 'Mapa mental completo sobre las principales estrategias de marketing en el entorno digital.',
+		category: 'empresarial',
+		lastModified: new Date('2024-01-15'),
+		nodeCount: 24,
+		thumbnail: 'https://trae-api-us.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20digital%20marketing%20strategy%20mind%20map%20with%20colorful%20nodes%20and%20connections%2C%20clean%20design&image_size=landscape_4_3'
+	},
+	{
+		id: 2,
+		title: 'Revolución Francesa',
+		description: 'Análisis histórico de las causas, desarrollo y consecuencias de la Revolución Francesa.',
+		category: 'academico',
+		lastModified: new Date('2024-01-12'),
+		nodeCount: 18,
+		thumbnail: 'https://trae-api-us.mchost.guru/api/ide/v1/text_to_image?prompt=french%20revolution%20historical%20mind%20map%20with%20timeline%20and%20key%20events%2C%20educational%20style&image_size=landscape_4_3'
+	},
+	{
+		id: 3,
+		title: 'Objetivos Personales 2024',
+		description: 'Planificación personal de metas y objetivos para el año 2024.',
+		category: 'personal',
+		lastModified: new Date('2024-01-10'),
+		nodeCount: 12
+	}
+];
 ---
 
-<Layout>
-	<Welcome />
+<Layout title="Mapas Mentales - Herramienta Educativa">
+	<ThemeWrapper client:load>
+		<main class="main-container">
+		<div class="content-wrapper">
+			<div class="cards-section">
+				<div class="cards-grid">
+					{sampleMindMaps.map((mindMap) => (
+						<MindMapCard
+							client:load
+							title={mindMap.title}
+							description={mindMap.description}
+							category={mindMap.category}
+							lastModified={mindMap.lastModified}
+							nodeCount={mindMap.nodeCount}
+							thumbnail={mindMap.thumbnail}
+							onClick={() => console.log(`Abrir mapa: ${mindMap.title}`)}
+						/>
+					))}
+				</div>
+			</div>
+		</div>
+		
+			<BottomNavigation client:load />
+		</main>
+	</ThemeWrapper>
 </Layout>
+
+<style>
+	.main-container {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		padding-top: 20px; /* Sin menú superior */
+		padding-bottom: 100px; /* Espacio para la navegación inferior */
+		min-height: 100vh;
+		background: var(--bg-primary);
+	}
+	
+	.content-wrapper {
+		flex: 1;
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 0 16px;
+		width: 100%;
+	}
+	
+
+	
+	.cards-section {
+		flex: 1;
+	}
+	
+	.cards-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+		gap: 20px;
+		padding-bottom: 20px;
+	}
+	
+	/* Responsive Design */
+	@media (max-width: 768px) {
+		.content-wrapper {
+			padding: 0 12px;
+		}
+		
+		.cards-grid {
+			grid-template-columns: 1fr;
+			gap: 16px;
+		}
+		
+		.search-section {
+			margin: 16px 0;
+		}
+		
+		.filters-section {
+			margin-bottom: 20px;
+		}
+	}
+	
+	@media (max-width: 480px) {
+		.content-wrapper {
+			padding: 0 8px;
+		}
+		
+		.cards-grid {
+			gap: 12px;
+		}
+	}
+	
+	@media (min-width: 1024px) {
+		.main-container {
+			padding-bottom: 20px; /* Menos espacio en desktop */
+		}
+		
+		.cards-grid {
+			grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+			gap: 24px;
+		}
+		
+		.search-section {
+			margin: 24px 0;
+		}
+		
+		.filters-section {
+			margin-bottom: 28px;
+		}
+	}
+</style>

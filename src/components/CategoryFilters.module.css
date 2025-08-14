@@ -1,0 +1,138 @@
+.filtersContainer {
+  width: 100%;
+  padding: 16px;
+  background: transparent;
+}
+
+.filtersWrapper {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.filtersWrapper::-webkit-scrollbar {
+  display: none;
+}
+
+.filterButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 166, 81, 0.2);
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.filterButton:hover {
+  background: rgba(0, 166, 81, 0.1);
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 166, 81, 0.15);
+}
+
+.filterButton.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 166, 81, 0.3);
+}
+
+.filterButton.active:hover {
+  background: var(--color-primary-dark);
+  transform: translateY(-1px);
+}
+
+.filterIcon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.filterLabel {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.filterCount {
+  font-size: 12px;
+  opacity: 0.8;
+  font-weight: 400;
+}
+
+.filterButton.active .filterCount {
+  opacity: 0.9;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .filtersContainer {
+    padding: 12px 16px;
+  }
+  
+  .filterButton {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+  
+  .filterIcon {
+    font-size: 14px;
+  }
+  
+  .filterLabel {
+    font-size: 13px;
+  }
+  
+  .filterCount {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .filtersWrapper {
+    gap: 6px;
+  }
+  
+  .filterButton {
+    padding: 5px 10px;
+    gap: 4px;
+  }
+  
+  .filterLabel {
+    display: none;
+  }
+  
+  .filterIcon {
+    font-size: 16px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .filterButton {
+    background: rgba(28, 28, 30, 0.8);
+    border-color: rgba(0, 166, 81, 0.3);
+    color: #f2f2f7;
+  }
+  
+  .filterButton:hover {
+    background: rgba(0, 166, 81, 0.2);
+  }
+  
+  .filterButton.active {
+    background: var(--color-primary);
+    color: white;
+  }
+}

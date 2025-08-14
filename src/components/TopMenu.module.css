@@ -1,0 +1,153 @@
+.topMenu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 0;
+  height: 60px;
+  display: flex;
+  align-items: center;
+}
+
+.menuContainer {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.logoIcon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.logoText {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+.menuList {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.menuItem {
+  margin: 0;
+}
+
+.menuButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: transparent;
+  border: none;
+  border-radius: 20px;
+  color: #1d1d1f;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.menuButton:hover {
+  background: rgba(0, 166, 81, 0.1);
+  color: #00A651;
+  transform: translateY(-1px);
+}
+
+.menuButton:active {
+  transform: translateY(0);
+  background: rgba(0, 166, 81, 0.2);
+}
+
+.menuIcon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.menuLabel {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .menuContainer {
+    padding: 0 16px;
+  }
+  
+  .logoText {
+    display: none;
+  }
+  
+  .menuButton {
+    padding: 8px 12px;
+    gap: 4px;
+  }
+  
+  .menuLabel {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .menuList {
+    gap: 4px;
+  }
+  
+  .menuButton {
+    padding: 6px 8px;
+    flex-direction: column;
+    gap: 2px;
+  }
+  
+  .menuIcon {
+    font-size: 14px;
+  }
+  
+  .menuLabel {
+    font-size: 10px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .topMenu {
+    background: rgba(28, 28, 30, 0.8);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .logoText,
+  .menuButton {
+    color: #f2f2f7;
+  }
+  
+  .menuButton:hover {
+    background: rgba(0, 166, 81, 0.2);
+    color: #00A651;
+  }
+}

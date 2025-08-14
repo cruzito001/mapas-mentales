@@ -1,0 +1,352 @@
+.editorContainer {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-primary);
+  display: flex;
+  flex-direction: column;
+}
+
+.editorContainer * {
+  box-sizing: border-box;
+}
+
+/* Prevent text selection during dragging */
+.editorContainer.dragging {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Canvas styles */
+.canvas {
+  flex: 1;
+  cursor: crosshair;
+  position: relative;
+  overflow: hidden;
+}
+
+.canvas.selectTool {
+  cursor: default;
+}
+
+.canvas.nodeTool {
+  cursor: crosshair;
+}
+
+.canvas.connectionTool {
+  cursor: pointer;
+}
+
+.canvas.dragging {
+  cursor: grabbing;
+}
+
+/* Node styles */
+.node {
+  position: absolute;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: var(--shadow-md);
+  border: 2px solid transparent;
+  font-weight: 500;
+  text-align: center;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  padding: 8px 12px;
+}
+
+/* Connection mode styles */
+.connectionTool .node {
+  cursor: crosshair;
+  border: 2px dashed rgba(255, 107, 53, 0.5);
+}
+
+.connectionTool .node:hover {
+  border-color: #FF6B35;
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.3);
+  transform: scale(1.05);
+}
+
+.node.connectionSource {
+  border: 2px solid #FF6B35 !important;
+  box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.4) !important;
+  animation: connectionPulse 1.5s ease-in-out infinite;
+}
+
+.node:hover {
+  transform: scale(1.02);
+  box-shadow: var(--shadow-lg);
+}
+
+.node.selected {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(0, 166, 81, 0.2);
+}
+
+.node.dragging {
+  cursor: grabbing;
+  transform: scale(1.05);
+  z-index: 1000;
+}
+
+.node.root {
+  font-weight: 600;
+  font-size: 18px;
+}
+
+/* Node input for editing */
+.nodeInput {
+  width: 100%;
+  height: 100%;
+  border: 2px solid #FF6B35;
+  background: white;
+  font-size: inherit;
+  font-family: inherit;
+  color: #333;
+  text-align: center;
+  resize: none;
+  outline: none;
+  padding: 8px;
+  box-sizing: border-box;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
+}
+
+.editingNode {
+  z-index: 1000 !important;
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+  transform: scale(1.02);
+}
+
+.nodeText {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 8px;
+  text-align: center;
+  word-wrap: break-word;
+  overflow: hidden;
+  cursor: text;
+}
+
+.nodeInput::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Connection styles */
+.connection {
+  position: absolute;
+  pointer-events: auto;
+  z-index: 5;
+}
+
+.connectionLine {
+  stroke-width: 2;
+  fill: none;
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.connectionLine:hover {
+  stroke-width: 3;
+  filter: brightness(1.2);
+}
+
+.selectedConnection {
+  stroke-width: 3 !important;
+  filter: drop-shadow(0 0 4px rgba(255, 107, 53, 0.5));
+}
+
+.connectionHandle {
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.connectionHandle:hover {
+  r: 6;
+  filter: drop-shadow(0 0 4px rgba(255, 107, 53, 0.8));
+}
+
+.previewConnection {
+  opacity: 0.7;
+  animation: connectionPreview 1s ease-in-out infinite alternate;
+}
+
+@keyframes connectionPreview {
+  from { opacity: 0.4; }
+  to { opacity: 0.8; }
+}
+
+@keyframes connectionPulse {
+  0%, 100% { stroke-width: 2; }
+  50% { stroke-width: 4; }
+}
+
+/* Resize handles */
+.resizeHandle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #FF6B35;
+  border: 2px solid white;
+  border-radius: 2px;
+  z-index: 1000;
+  transition: var(--transition);
+}
+
+.resizeHandle:hover {
+  background: #FF8C42;
+  transform: scale(1.2);
+  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.4);
+}
+
+.topLeft {
+  top: -6px;
+  left: -6px;
+  cursor: nw-resize;
+}
+
+.topRight {
+  top: -6px;
+  right: -6px;
+  cursor: ne-resize;
+}
+
+.bottomLeft {
+  bottom: -6px;
+  left: -6px;
+  cursor: sw-resize;
+}
+
+.bottomRight {
+  bottom: -6px;
+  right: -6px;
+  cursor: se-resize;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .node {
+    min-width: 120px;
+    min-height: 50px;
+    font-size: 14px;
+    padding: 6px 10px;
+  }
+  
+  .node.root {
+    font-size: 16px;
+  }
+  
+  .selectionHandle {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .node {
+    min-width: 100px;
+    min-height: 45px;
+    font-size: 13px;
+    padding: 5px 8px;
+  }
+  
+  .node.root {
+    font-size: 15px;
+  }
+}
+
+.separator {
+  width: 1px;
+  height: 24px;
+  background: var(--border-color);
+  margin: 0 8px;
+}
+
+/* Style Controls */
+.styleControls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px;
+}
+
+.styleLabel {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.styleSelect {
+  padding: 4px 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.styleSelect:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.styleRange {
+  width: 60px;
+  height: 4px;
+  background: var(--border-color);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.styleRange::-webkit-slider-thumb {
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  background: var(--color-primary);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.colorPicker {
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background: none;
+}
+
+.colorPicker::-webkit-color-swatch {
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+}
+
+.colorPicker::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.toolButton:hover {
+  background: var(--bg-secondary);
+  color: var(--color-primary);
+}
+
+.toolButton.active {
+  background: var(--color-primary);
+  color: white;
+}
+
+.toolButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
