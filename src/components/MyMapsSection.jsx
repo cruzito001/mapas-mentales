@@ -91,11 +91,11 @@ const MyMapsSection = () => {
           <MindMapCard
             key={map.id}
             title={map.title}
-            description={map.description || `Mapa mental creado el ${map.lastModified.toLocaleDateString()}`}
+            description={map.description || `${getNodeCount(map.data)} nodos`}
             category={map.category || 'personal'}
             lastModified={map.lastModified}
             nodeCount={getNodeCount(map.data)}
-            thumbnail={map.thumbnail || generateThumbnail(map.title, map.category)}
+            thumbnail={map.thumbnail || '/api/placeholder/300/200'}
             onClick={() => handleMapClick(map.id)}
           />
         ))}

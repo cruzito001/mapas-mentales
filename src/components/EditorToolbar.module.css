@@ -587,6 +587,59 @@
   cursor: not-allowed;
 }
 
+/* Category selector styles */
+.categorySelector {
+  margin-bottom: 20px;
+}
+
+.categorySelector p {
+  margin: 0 0 12px 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.categoryOptions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.categoryOption {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: var(--transition);
+  flex: 1;
+  min-width: 0;
+  justify-content: center;
+}
+
+.categoryOption:hover {
+  background: var(--bg-overlay);
+  color: var(--text-primary);
+  border-color: var(--color-primary);
+}
+
+.categoryOption.selected {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.categoryIcon {
+  font-size: 14px;
+  line-height: 1;
+}
+
 /* Responsive styles for save components */
 @media (max-width: 768px) {
   .saveButton {

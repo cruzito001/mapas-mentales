@@ -24,7 +24,8 @@ const EditorToolbar = ({
   onExportPDF,
   nodes,
   connections,
-  pan
+  pan,
+  currentMapInfo
 }) => {
   const { isDarkMode } = useThemeSafe();
   const [showColorPicker, setShowColorPicker] = useState(false);
@@ -120,6 +121,7 @@ const EditorToolbar = ({
   const [showSaveMenu, setShowSaveMenu] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [mapName, setMapName] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('personal');
 
   const handleExportPDF = async () => {
     setIsExporting(true);
@@ -135,40 +137,139 @@ const EditorToolbar = ({
     setShowSaveMenu(false);
   };
 
-  const handleSaveProgress = () => {
-    setShowSaveDialog(true);
+  const handleSaveProgress = async () => {
     setShowSaveMenu(false);
+    
+    // Si es un mapa existente (abierto desde 'Mis Mapas'), actualizar directamente
+    if (currentMapInfo && currentMapInfo.isExisting) {
+      await updateExistingMap();
+    } else {
+      // Si es un mapa nuevo, mostrar diálogo
+      setShowSaveDialog(true);
+      setSelectedCategory('personal'); // Reset to default
+    }
   };
 
-  const confirmSaveProgress = () => {
+  const updateExistingMap = async () => {
+    try {
+      const now = new Date();
+      const savedMaps = JSON.parse(localStorage.getItem('savedMindMaps') || '[]');
+      
+      // Generate thumbnail
+      const thumbnail = await generateMapThumbnail();
+      
+      // Buscar el mapa existente por ID
+      const existingMapIndex = savedMaps.findIndex(map => map.id === currentMapInfo.id);
+      
+      if (existingMapIndex !== -1) {
+        const existingMap = savedMaps[existingMapIndex];
+        
+        // Actualizar solo los datos del mapa, manteniendo título, categoría e ID
+        const updatedMap = {
+          ...existingMap,
+          data: {
+            nodes: nodes || [],
+            connections: connections || [],
+            zoom: zoom || 1,
+            pan: pan || { x: 0, y: 0 }
+          },
+          thumbnail: thumbnail,
+          lastModified: now.toISOString(),
+          updatedAt: now.toISOString()
+        };
+        
+        savedMaps[existingMapIndex] = updatedMap;
+        localStorage.setItem('savedMindMaps', JSON.stringify(savedMaps));
+        
+        alert('Mapa actualizado exitosamente');
+      } else {
+        alert('Error: No se pudo encontrar el mapa para actualizar');
+      }
+    } catch (error) {
+      console.error('Error al actualizar el mapa:', error);
+      alert('Error al actualizar el mapa');
+    }
+  };
+
+  const generateMapThumbnail = async () => {
+    try {
+      // Find the canvas element
+      const canvasElement = document.querySelector('.mind-map-canvas');
+      if (!canvasElement) return null;
+
+      const html2canvas = (await import('html2canvas')).default;
+      
+      const canvas = await html2canvas(canvasElement, {
+        backgroundColor: 'transparent',
+        scale: 0.3, // Smaller scale for thumbnail
+        width: 400,
+        height: 300,
+        useCORS: true,
+        allowTaint: true
+      });
+      
+      return canvas.toDataURL('image/png');
+    } catch (error) {
+      console.error('Error generating thumbnail:', error);
+      return null;
+    }
+  };
+
+  const confirmSaveProgress = async () => {
     if (mapName.trim()) {
+      const now = new Date();
+      const savedMaps = JSON.parse(localStorage.getItem('savedMindMaps') || '[]');
+      
+      // Generate thumbnail
+      const thumbnail = await generateMapThumbnail();
+      
+      // Buscar si ya existe un mapa con el mismo nombre
+      const existingMapIndex = savedMaps.findIndex(map => 
+        map.title === mapName.trim() || map.name === mapName.trim()
+      );
+      
       const mapData = {
-        id: Date.now().toString(),
-        name: mapName.trim(),
+        title: mapName.trim(),
+        name: mapName.trim(), // Keep for backward compatibility
+        category: selectedCategory,
         data: {
           nodes: nodes || [],
           connections: connections || [],
           zoom: zoom || 1,
           pan: pan || { x: 0, y: 0 }
         },
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        thumbnail: thumbnail,
+        lastModified: now.toISOString(),
+        updatedAt: now.toISOString()
       };
       
-      // Guardar en localStorage
-      const savedMaps = JSON.parse(localStorage.getItem('mindMaps') || '[]');
-      savedMaps.push(mapData);
-      localStorage.setItem('mindMaps', JSON.stringify(savedMaps));
+      if (existingMapIndex !== -1) {
+        // Actualizar mapa existente
+        const existingMap = savedMaps[existingMapIndex];
+        mapData.id = existingMap.id;
+        mapData.createdAt = existingMap.createdAt; // Mantener fecha de creación original
+        savedMaps[existingMapIndex] = mapData;
+        alert('Mapa actualizado exitosamente');
+      } else {
+        // Crear nuevo mapa
+        mapData.id = Date.now().toString();
+        mapData.createdAt = now.toISOString();
+        savedMaps.push(mapData);
+        alert('Mapa guardado exitosamente');
+      }
+      
+      localStorage.setItem('savedMindMaps', JSON.stringify(savedMaps));
       
       setShowSaveDialog(false);
       setMapName('');
-      alert('Mapa guardado exitosamente');
+      setSelectedCategory('personal');
     }
   };
 
   const cancelSaveProgress = () => {
     setShowSaveDialog(false);
     setMapName('');
+    setSelectedCategory('personal');
   };
 
   const handleClearAllWithConfirm = () => {
@@ -417,7 +518,12 @@ const EditorToolbar = ({
                   <polyline points="17,21 17,13 7,13 7,21"></polyline>
                   <polyline points="7,3 7,8 15,8"></polyline>
                 </svg>
-                <span>Guardar Progreso</span>
+                <span>
+                  {currentMapInfo && currentMapInfo.isExisting 
+                    ? `Actualizar "${currentMapInfo.title}"` 
+                    : 'Guardar Progreso'
+                  }
+                </span>
               </button>
             </div>
           )}
@@ -436,6 +542,34 @@ const EditorToolbar = ({
                 className={styles.saveInput}
                 autoFocus
               />
+              
+              <div className={styles.categorySelector}>
+                <p>Selecciona una categoría:</p>
+                <div className={styles.categoryOptions}>
+                  <button 
+                    className={`${styles.categoryOption} ${selectedCategory === 'personal' ? styles.selected : ''}`}
+                    onClick={() => setSelectedCategory('personal')}
+                  >
+                    <span className={styles.categoryIcon}>👤</span>
+                    <span>Personal</span>
+                  </button>
+                  <button 
+                    className={`${styles.categoryOption} ${selectedCategory === 'escuela' ? styles.selected : ''}`}
+                    onClick={() => setSelectedCategory('escuela')}
+                  >
+                    <span className={styles.categoryIcon}>🎓</span>
+                    <span>Escuela</span>
+                  </button>
+                  <button 
+                    className={`${styles.categoryOption} ${selectedCategory === 'negocio' ? styles.selected : ''}`}
+                    onClick={() => setSelectedCategory('negocio')}
+                  >
+                    <span className={styles.categoryIcon}>💼</span>
+                    <span>Negocio</span>
+                  </button>
+                </div>
+              </div>
+              
               <div className={styles.saveDialogActions}>
                 <button 
                   className={styles.cancelButton}

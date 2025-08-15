@@ -59,6 +59,9 @@ const Trash2Icon = () => (
 
 const MindMapEditor = () => {
   const { isDarkMode } = useThemeSafe();
+  
+  // State to track current map info for smart saving
+  const [currentMapInfo, setCurrentMapInfo] = useState(null);
 
   // Helper function to get contrasting text color
   const getContrastColor = (backgroundColor) => {
@@ -246,6 +249,14 @@ const MindMapEditor = () => {
               setZoom(savedZoom || 1);
               setPan(savedPan || { x: 0, y: 0 });
               
+              // Store current map info for smart saving
+              setCurrentMapInfo({
+                id: targetMap.id,
+                title: targetMap.title || targetMap.name,
+                category: targetMap.category || 'personal',
+                isExisting: true
+              });
+              
               // Save as current map for auto-save
               localStorage.setItem('currentMindMap', JSON.stringify(targetMap.data));
               return;
@@ -255,6 +266,9 @@ const MindMapEditor = () => {
       } catch (error) {
         console.error('Error loading specific mind map:', error);
       }
+    } else {
+      // Reset current map info for new maps
+      setCurrentMapInfo(null);
     }
     
     // Fallback to current mind map if no specific map requested or found
@@ -630,6 +644,7 @@ const MindMapEditor = () => {
         nodes={nodes}
         connections={connections}
         pan={pan}
+        currentMapInfo={currentMapInfo}
       />
       <div 
         ref={canvasRef}

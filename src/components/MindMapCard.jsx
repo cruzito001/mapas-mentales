@@ -32,16 +32,27 @@ const MindMapCard = ({
 
   const formatDate = (date) => {
     if (!date) return 'Hace un momento';
-    const now = new Date();
-    const diffTime = Math.abs(now - new Date(date));
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
-    if (diffDays === 1) return 'Ayer';
-    if (diffDays < 7) return `Hace ${diffDays} días`;
-    return new Date(date).toLocaleDateString('es-ES', { 
-      day: 'numeric', 
-      month: 'short' 
-    });
+    try {
+      const dateObj = new Date(date);
+      // Verificar si la fecha es válida
+      if (isNaN(dateObj.getTime())) {
+        return 'Hace un momento';
+      }
+      
+      const now = new Date();
+      const diffTime = Math.abs(now - dateObj);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      if (diffDays === 1) return 'Ayer';
+      if (diffDays < 7) return `Hace ${diffDays} días`;
+      return dateObj.toLocaleDateString('es-ES', { 
+        day: 'numeric', 
+        month: 'short' 
+      });
+    } catch (error) {
+      return 'Hace un momento';
+    }
   };
 
   return (
